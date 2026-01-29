@@ -12,7 +12,7 @@ export {
 } from "./sandbox/constants.js";
 export { ensureSandboxWorkspaceForSession, resolveSandboxContext } from "./sandbox/context.js";
 
-export { buildSandboxCreateArgs } from "./sandbox/docker.js";
+export { buildSandboxCreateArgs, buildSandboxSetupExecArgs } from "./sandbox/docker.js";
 export {
   listSandboxBrowsers,
   listSandboxContainers,

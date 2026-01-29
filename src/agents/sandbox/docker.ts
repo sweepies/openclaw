@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import path from "node:path";
 
 import { defaultRuntime } from "../../runtime.js";
 import { formatCliCommand } from "../../cli/command-format.js";
@@ -44,6 +45,27 @@ export async function readDockerPort(containerName: string, port: number) {
   if (!match) return null;
   const mapped = Number.parseInt(match[1] ?? "", 10);
   return Number.isFinite(mapped) ? mapped : null;
+}
+
+export function buildSandboxSetupExecArgs(params: {
+  containerName: string;
+  workdir: string;
+  setupCommand: string;
+}) {
+  return [
+    "exec",
+    "-i",
+    "-e",
+    `HOME=${params.workdir}`,
+    "-e",
+    `MISE_DATA_DIR=${path.posix.join(params.workdir, ".local", "share", "mise")}`,
+    "-e",
+    `MISE_STATE_DIR=${path.posix.join(params.workdir, ".local", "state", "mise")}`,
+    params.containerName,
+    "sh",
+    "-lc",
+    params.setupCommand,
+  ];
 }
 
 async function dockerImageExists(image: string) {
@@ -203,7 +225,13 @@ async function createSandboxContainer(params: {
   await execDocker(["start", name]);
 
   if (cfg.setupCommand?.trim()) {
-    await execDocker(["exec", "-i", name, "sh", "-lc", cfg.setupCommand]);
+    await execDocker(
+      buildSandboxSetupExecArgs({
+        containerName: name,
+        workdir: cfg.workdir,
+        setupCommand: cfg.setupCommand,
+      }),
+    );
   }
 }
 
