@@ -168,21 +168,19 @@ describe("sandbox setup command env", () => {
       setupCommand: "echo setup",
     });
 
-    expect(setupCall).toEqual(
-      expect.arrayContaining([
-        "exec",
-        "-i",
-        "-e",
-        "HOME=/workspace",
-        "-e",
-        "MISE_DATA_DIR=/workspace/.local/share/mise",
-        "-e",
-        "MISE_STATE_DIR=/workspace/.local/state/mise",
-        "moltbot-sbx-test",
-        "sh",
-        "-lc",
-        "echo setup",
-      ]),
-    );
+    expect(setupCall).toEqual([
+      "exec",
+      "-i",
+      "-e",
+      "HOME=/workspace",
+      "-e",
+      "MISE_DATA_DIR=/workspace/.local/share/mise",
+      "-e",
+      "MISE_STATE_DIR=/workspace/.local/state/mise",
+      "moltbot-sbx-test",
+      "sh",
+      "-lc",
+      "echo setup",
+    ]);
   });
 });

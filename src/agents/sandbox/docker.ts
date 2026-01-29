@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import path from "node:path";
 
 import { defaultRuntime } from "../../runtime.js";
 import { formatCliCommand } from "../../cli/command-format.js";
