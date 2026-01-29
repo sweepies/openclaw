@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSandboxCreateArgs, type SandboxDockerConfig } from "./sandbox.js";
+import {
+  buildSandboxCreateArgs,
+  buildSandboxSetupExecArgs,
+  type SandboxDockerConfig,
+} from "./sandbox.js";
 
 describe("buildSandboxCreateArgs", () => {
   it("includes hardening and resource flags", () => {
@@ -153,5 +157,32 @@ describe("buildSandboxCreateArgs", () => {
       }
     }
     expect(customVFlags).toHaveLength(0);
+  });
+});
+
+describe("sandbox setup command env", () => {
+  it("sets HOME and mise dirs for setup command", () => {
+    const setupCall = buildSandboxSetupExecArgs({
+      containerName: "moltbot-sbx-test",
+      workdir: "/workspace",
+      setupCommand: "echo setup",
+    });
+
+    expect(setupCall).toEqual(
+      expect.arrayContaining([
+        "exec",
+        "-i",
+        "-e",
+        "HOME=/workspace",
+        "-e",
+        "MISE_DATA_DIR=/workspace/.local/share/mise",
+        "-e",
+        "MISE_STATE_DIR=/workspace/.local/state/mise",
+        "moltbot-sbx-test",
+        "sh",
+        "-lc",
+        "echo setup",
+      ]),
+    );
   });
 });

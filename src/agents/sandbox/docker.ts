@@ -46,6 +46,27 @@ export async function readDockerPort(containerName: string, port: number) {
   return Number.isFinite(mapped) ? mapped : null;
 }
 
+export function buildSandboxSetupExecArgs(params: {
+  containerName: string;
+  workdir: string;
+  setupCommand: string;
+}) {
+  return [
+    "exec",
+    "-i",
+    "-e",
+    `HOME=${params.workdir}`,
+    "-e",
+    `MISE_DATA_DIR=${path.posix.join(params.workdir, ".local", "share", "mise")}`,
+    "-e",
+    `MISE_STATE_DIR=${path.posix.join(params.workdir, ".local", "state", "mise")}`,
+    params.containerName,
+    "sh",
+    "-lc",
+    params.setupCommand,
+  ];
+}
+
 async function dockerImageExists(image: string) {
   const result = await execDocker(["image", "inspect", image], {
     allowFailure: true,
@@ -203,7 +224,13 @@ async function createSandboxContainer(params: {
   await execDocker(["start", name]);
 
   if (cfg.setupCommand?.trim()) {
-    await execDocker(["exec", "-i", name, "sh", "-lc", cfg.setupCommand]);
+    await execDocker(
+      buildSandboxSetupExecArgs({
+        containerName: name,
+        workdir: cfg.workdir,
+        setupCommand: cfg.setupCommand,
+      }),
+    );
   }
 }
 
